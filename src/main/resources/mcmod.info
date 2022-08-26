@@ -1,0 +1,17 @@
+[
+  {
+    "modid": "vmfixes",
+    "name": "VoxelMap Fixes",
+    "description": "Minimally invasive fixes for VoxelMap",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "authorList": [
+      "ACGaming"
+    ],
+    "dependencies": [
+      "mixinbooter",
+      "voxelmap"
+    ]
+  }
+]
