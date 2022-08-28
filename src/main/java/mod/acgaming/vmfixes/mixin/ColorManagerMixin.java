@@ -4,8 +4,10 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import com.mamiyaotaru.voxelmap.ColorManager;
+import com.mamiyaotaru.voxelmap.interfaces.AbstractMapData;
 import com.mamiyaotaru.voxelmap.util.MutableBlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -46,15 +48,27 @@ public class ColorManagerMixin
         if (Minecraft.getMinecraft().world.getTileEntity(blockPos) != null) cir.setReturnValue(0);
     }
 
+    @Inject(method = "checkForBiomeTinting", at = @At(value = "HEAD"), remap = false, cancellable = true)
+    public void VMFixes_checkForBiomeTinting(MutableBlockPos blockPos, IBlockState blockState, int color, CallbackInfo ci)
+    {
+        if (Minecraft.getMinecraft().world.getTileEntity(blockPos) != null) ci.cancel();
+    }
+
     @Inject(method = "tintFromFakePlacedBlock", at = @At(value = "HEAD"), remap = false, cancellable = true)
     public void VMFixes_tintFromFakePlacedBlock(IBlockState blockState, MutableBlockPos loopBlockPos, byte biomeID, CallbackInfoReturnable<Integer> cir)
     {
         if (Minecraft.getMinecraft().world.getTileEntity(loopBlockPos) != null) cir.setReturnValue(-1);
     }
 
-//    @Inject(method = "createTintTable", at = @At(value = "HEAD"), remap = false, cancellable = true)
-//    public void VMFixes_createTintTable(IBlockState blockState, MutableBlockPos loopBlockPos, CallbackInfo ci)
-//    {
-//        if (Minecraft.getMinecraft().world.getTileEntity(loopBlockPos) != null) ci.cancel();
-//    }
+    @Inject(method = "getCustomBlockBiomeTintFromUnloadedChunk", at = @At(value = "HEAD"), remap = false, cancellable = true)
+    public void VMFixes_getCustomBlockBiomeTintFromUnloadedChunk(AbstractMapData mapData, World world, IBlockState blockState, MutableBlockPos blockPos, MutableBlockPos loopBlockPos, int startX, int startZ, CallbackInfoReturnable<Integer> cir)
+    {
+        if (Minecraft.getMinecraft().world.getTileEntity(loopBlockPos) != null) cir.setReturnValue(-1);
+    }
+
+    @Inject(method = "createTintTable", at = @At(value = "HEAD"), remap = false, cancellable = true)
+    public void VMFixes_createTintTable(IBlockState blockState, MutableBlockPos loopBlockPos, CallbackInfo ci)
+    {
+        if (Minecraft.getMinecraft().world.getTileEntity(loopBlockPos) != null) ci.cancel();
+    }
 }
