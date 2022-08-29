@@ -1,10 +1,10 @@
 package mod.acgaming.vmfixes.mixin;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.World;
 
 import com.mamiyaotaru.voxelmap.Map;
 import com.mamiyaotaru.voxelmap.util.MutableBlockPos;
+import mod.acgaming.vmfixes.VMFixes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,6 +20,6 @@ public class MapMixin
     @Inject(method = "getPixelColor", at = @At(value = "RETURN"), remap = false, cancellable = true)
     public void VMFixes_getPixelColor(boolean needBiome, boolean needHeightAndID, boolean needTint, boolean needLight, boolean nether, boolean caves, World world, int multi, int startX, int startZ, int imageX, int imageY, CallbackInfoReturnable<Integer> cir)
     {
-        if (Minecraft.getMinecraft().world.getTileEntity(this.blockPos) != null) cir.setReturnValue(0);
+        if (VMFixes.ripBozo(blockPos)) cir.setReturnValue(0);
     }
 }

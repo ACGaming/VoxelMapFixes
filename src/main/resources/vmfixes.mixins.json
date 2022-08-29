@@ -3,5 +3,5 @@
   "refmap": "vmfixes.refmap.json",
   "minVersion": "0.8",
   "compatibilityLevel": "JAVA_8",
-  "mixins": ["ColorManagerMixin", "CompressibleMapDataMixin", "MapMixin", "PersistentMapMixin"]
+  "mixins": ["CachedRegionMixin", "ColorManagerMixin", "ComparisonCachedRegionMixin", "CompressibleMapDataMixin", "MapMixin"]
 }
