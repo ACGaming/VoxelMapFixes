@@ -24,13 +24,13 @@ public class VMFixes
 {
     public static final String MODID = "vmfixes";
     public static final String NAME = "VoxelMap Fixes";
-    public static final String VERSION = "1.12.2-1.0.4";
+    public static final String VERSION = "1.12.2-1.0.5";
     public static final Logger LOGGER = LogManager.getLogger();
 
     public static List<String> teList;
     public static List<String> blockList;
 
-    public static boolean ripBozo(MutableBlockPos blockPos)
+    public static boolean configBlocked(MutableBlockPos blockPos)
     {
         Block block = Minecraft.getMinecraft().world.getBlockState(blockPos).getBlock();
         ResourceLocation resLoc = Block.REGISTRY.getNameForObject(block);

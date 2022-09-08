@@ -20,6 +20,6 @@ public class MapMixin
     @Inject(method = "getPixelColor", at = @At(value = "RETURN"), remap = false, cancellable = true)
     public void VMFixes_getPixelColor(boolean needBiome, boolean needHeightAndID, boolean needTint, boolean needLight, boolean nether, boolean caves, World world, int multi, int startX, int startZ, int imageX, int imageY, CallbackInfoReturnable<Integer> cir)
     {
-        if (VMFixes.ripBozo(blockPos)) cir.setReturnValue(0);
+        if (VMFixes.configBlocked(blockPos)) cir.setReturnValue(0);
     }
 }
