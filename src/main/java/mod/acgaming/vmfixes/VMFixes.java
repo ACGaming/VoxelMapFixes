@@ -1,5 +1,6 @@
 package mod.acgaming.vmfixes;
 
+import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -42,6 +44,26 @@ public class VMFixes
         {
             return VMFixes.blockList.contains(resLoc.getNamespace() + ":*") || VMFixes.blockList.contains(resLoc.toString());
         }
+    }
+
+    // Courtesy of mezz
+    public static BufferedImage getBufferedImage(TextureAtlasSprite textureAtlasSprite)
+    {
+        final int iconWidth = textureAtlasSprite.getIconWidth();
+        final int iconHeight = textureAtlasSprite.getIconHeight();
+        final int frameCount = textureAtlasSprite.getFrameCount();
+        if (iconWidth <= 0 || iconHeight <= 0 || frameCount <= 0)
+        {
+            return null;
+        }
+        BufferedImage bufferedImage = new BufferedImage(iconWidth, iconHeight * frameCount, BufferedImage.TYPE_4BYTE_ABGR);
+        for (int i = 0; i < frameCount; i++)
+        {
+            int[][] frameTextureData = textureAtlasSprite.getFrameTextureData(i);
+            int[] largestMipMapTextureData = frameTextureData[0];
+            bufferedImage.setRGB(0, i * iconHeight, iconWidth, iconHeight, largestMipMapTextureData, 0, iconWidth);
+        }
+        return bufferedImage;
     }
 
     @Mod.EventHandler

@@ -1,5 +1,6 @@
 package mod.acgaming.vmfixes.mixin;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 import net.minecraft.block.Block;
@@ -20,8 +21,6 @@ import com.mamiyaotaru.voxelmap.util.GLUtils;
 import com.mamiyaotaru.voxelmap.util.ImageUtils;
 import com.mamiyaotaru.voxelmap.util.MutableBlockPos;
 import mod.acgaming.vmfixes.VMFixes;
-import mod.acgaming.vmfixes.color.ColorHelper;
-import mod.acgaming.vmfixes.color.IntList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -130,12 +129,10 @@ public abstract class ColorManagerMixin
         {
             EnumBlockRenderType blockRenderType = blockState.getRenderType();
             BlockRendererDispatcher blockRendererDispatcher = this.game.getBlockRendererDispatcher();
-
             if (blockRenderType == EnumBlockRenderType.LIQUID)
             {
                 return color = getColorForTerrainSprite(blockState, blockRendererDispatcher);
             }
-
             TextureAtlasSprite icon = blockRendererDispatcher.getModelForState(blockState).getQuads(blockState, facing, 0).get(0).getSprite();
             return getColorForIcon(icon);
         }
@@ -144,34 +141,28 @@ public abstract class ColorManagerMixin
     }
 
     /**
-     * @author ACGaming, sblectric
+     * @author ACGaming
      * @reason VMFixes
      */
     @Overwrite(remap = false)
     private int getColorForIcon(TextureAtlasSprite icon)
     {
+        int color = 452984832;
         try
         {
-            int w = icon.getIconWidth();
-            int h = icon.getIconHeight();
-            IntList colors = new IntList();
-            int[] aint = icon.getFrameTextureData(0)[0];
-            for (int x = 0; x < w; x++)
-            {
-                for (int y = 0; y < h; y++)
-                {
-                    int c = aint[x + y * h];
-                    if (c == 0) continue;
-                    colors.add(c);
-                }
-            }
-            return ColorHelper.averageColors(colors);
+            BufferedImage iconBuff = VMFixes.getBufferedImage(icon);
+            Image singlePixel = iconBuff.getScaledInstance(1, 1, 4);
+            BufferedImage singlePixelBuff = new BufferedImage(1, 1, iconBuff.getType());
+            Graphics gfx = singlePixelBuff.createGraphics();
+            gfx.drawImage(singlePixel, 0, 0, null);
+            gfx.dispose();
+            color = singlePixelBuff.getRGB(0, 0);
         }
         catch (Exception e)
         {
-            VMFixes.LOGGER.warn("Error getting color from icon " + icon);
-            return 452984832;
+            VMFixes.LOGGER.warn("Error getting color from TextureAtlasSprite " + icon);
         }
+        return color;
     }
 
     /**
