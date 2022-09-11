@@ -38,7 +38,7 @@ public abstract class ColorManagerMixin
     @Inject(method = "getColor", at = @At(value = "HEAD"), remap = false, cancellable = true)
     public void VMFixes_getColor(MutableBlockPos blockPos, IBlockState blockState, CallbackInfoReturnable<Integer> cir)
     {
-        if (VMFixes.configBlocked(blockPos)) cir.setReturnValue(452984832);
+        if (VMFixes.configBlocked(blockPos)) cir.setReturnValue(0);
     }
 
     @Inject(method = "getBlockColorWithDefaultTint", at = @At(value = "HEAD"), remap = false, cancellable = true)
@@ -123,7 +123,7 @@ public abstract class ColorManagerMixin
     @Overwrite(remap = false)
     private int getColorForBlockPosBlockStateAndFacing(BlockPos blockPos, IBlockState blockState, EnumFacing facing)
     {
-        int color = 452984832;
+        int color = 0;
         if (VMFixes.configBlocked((MutableBlockPos) blockPos)) return color;
         try
         {
@@ -147,7 +147,7 @@ public abstract class ColorManagerMixin
     @Overwrite(remap = false)
     private int getColorForIcon(TextureAtlasSprite icon)
     {
-        int color = 452984832;
+        int color = 0;
         try
         {
             BufferedImage iconBuff = VMFixes.getBufferedImage(icon);

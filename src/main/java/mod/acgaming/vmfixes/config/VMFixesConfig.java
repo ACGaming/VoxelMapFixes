@@ -18,33 +18,18 @@ public class VMFixesConfig
         {
             "List of mod IDs whose tile entities are skipped.",
             "Use this first when you notice errors in log files.",
-            "You can use specific block names or wildcards."
+            "You can use specific block names (mod_id:block) or wildcards (mod_id:*)."
         })
-    public static String[] a_skippedTileEntities = new String[]
-        {
-            "botania:*",
-            "forgemultipartcbe:*",
-            "galacticraftcore:*",
-            "ic2:*",
-            "oc:*",
-            "projectred-expansion:*",
-            "projectred-illumination:*",
-            "railcraft:*"
-        };
+    public static String[] a_skippedTileEntities = new String[] {};
 
     @Config.Name("B) Skipped Blocks")
     @Config.Comment(
         {
             "List of mod IDs whose blocks are skipped.",
             "Add to this as well if skipping tile entities alone doesn't work.",
-            "You can use specific block names or wildcards."
+            "You can use specific block names (mod_id:block) or wildcards (mod_id:*)."
         })
-    public static String[] b_skippedBlocks = new String[]
-        {
-            "forgemultipartcbe:*",
-            "projectred-expansion:*",
-            "projectred-illumination:*"
-        };
+    public static String[] b_skippedBlocks = new String[] {};
 
     @Mod.EventBusSubscriber(modid = VMFixes.MODID)
     public static class EventHandler
