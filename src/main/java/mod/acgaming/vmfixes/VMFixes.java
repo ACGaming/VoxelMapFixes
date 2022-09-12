@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
@@ -29,9 +30,10 @@ public class VMFixes
 
     public static boolean configBlocked(MutableBlockPos blockPos)
     {
-        Block block = Minecraft.getMinecraft().world.getBlockState(blockPos).getBlock();
+        IBlockState blockState = Minecraft.getMinecraft().world.getBlockState(blockPos);
+        Block block = blockState.getBlock();
         ResourceLocation resLoc = Block.REGISTRY.getNameForObject(block);
-        if (Minecraft.getMinecraft().world.getTileEntity(blockPos) != null)
+        if (block.hasTileEntity(blockState))
         {
             return VMFixes.teList.contains(resLoc.getNamespace() + ":*") || VMFixes.teList.contains(resLoc.toString());
         }

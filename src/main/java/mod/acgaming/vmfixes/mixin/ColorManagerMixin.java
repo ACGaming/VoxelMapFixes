@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.MapColor;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
@@ -186,18 +187,23 @@ public abstract class ColorManagerMixin
         {
             EnumBlockRenderType blockRenderType = blockState.getRenderType();
             BlockRendererDispatcher blockRendererDispatcher = this.game.getBlockRendererDispatcher();
-            if (blockRenderType == EnumBlockRenderType.MODEL)
+            if (blockRenderType == EnumBlockRenderType.LIQUID)
+            {
+                return getColorForTerrainSprite(blockState, blockRendererDispatcher);
+            }
+            else
             {
                 blockState = blockState.getBlock().hasTileEntity(blockState) ? blockState.getBlock().getDefaultState() : blockState.getActualState(this.game.world, blockPos);
-            }
-            else if (blockRenderType == EnumBlockRenderType.LIQUID)
-            {
-                return color = getColorForTerrainSprite(blockState, blockRendererDispatcher);
             }
             TextureAtlasSprite icon = blockRendererDispatcher.getModelForState(blockState).getQuads(blockState, facing, 0).get(0).getSprite();
             return getColorForIcon(icon);
         }
-        catch (Exception ignored) {}
+        catch (Exception e)
+        {
+            MapColor mapColor = blockState.getMaterial().getMaterialMapColor();
+            int index = mapColor.colorIndex;
+            color = mapColor.getMapColor(index);
+        }
         return color;
     }
 
