@@ -1,21 +1,12 @@
 package mod.acgaming.vmfixes;
 
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-
-import com.mamiyaotaru.voxelmap.util.MutableBlockPos;
-import mod.acgaming.vmfixes.config.VMFixesConfig;
 
 @Mod(modid = VMFixes.MODID, name = VMFixes.NAME, version = VMFixes.VERSION, acceptedMinecraftVersions = "[1.12.2]", dependencies = "required-after:mixinbooter;required-after:voxelmap", clientSideOnly = true)
 public class VMFixes
@@ -24,24 +15,6 @@ public class VMFixes
     public static final String NAME = "VoxelMap Fixes";
     public static final String VERSION = "1.12.2-1.0.6";
     public static final Logger LOGGER = LogManager.getLogger();
-
-    public static List<String> teList;
-    public static List<String> blockList;
-
-    public static boolean configBlocked(MutableBlockPos blockPos)
-    {
-        IBlockState blockState = Minecraft.getMinecraft().world.getBlockState(blockPos);
-        Block block = blockState.getBlock();
-        ResourceLocation resLoc = Block.REGISTRY.getNameForObject(block);
-        if (block.hasTileEntity(blockState))
-        {
-            return VMFixes.teList.contains(resLoc.getNamespace() + ":*") || VMFixes.teList.contains(resLoc.toString());
-        }
-        else
-        {
-            return VMFixes.blockList.contains(resLoc.getNamespace() + ":*") || VMFixes.blockList.contains(resLoc.toString());
-        }
-    }
 
     // Courtesy of mezz
     public static BufferedImage getBufferedImage(TextureAtlasSprite textureAtlasSprite)
@@ -66,8 +39,6 @@ public class VMFixes
     @Mod.EventHandler
     public void init(FMLInitializationEvent event)
     {
-        teList = Arrays.asList(VMFixesConfig.a_skippedTileEntities);
-        blockList = Arrays.asList(VMFixesConfig.b_skippedBlocks);
         LOGGER.info("VoxelMap Fixes initialized");
     }
 }

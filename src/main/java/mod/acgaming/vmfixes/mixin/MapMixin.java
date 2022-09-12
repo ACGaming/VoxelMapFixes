@@ -14,7 +14,6 @@ import com.mamiyaotaru.voxelmap.util.BiomeRepository;
 import com.mamiyaotaru.voxelmap.util.BlockRepository;
 import com.mamiyaotaru.voxelmap.util.FullMapData;
 import com.mamiyaotaru.voxelmap.util.MutableBlockPos;
-import mod.acgaming.vmfixes.VMFixes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -69,8 +68,6 @@ public abstract class MapMixin implements Runnable, IMap
     @Overwrite(remap = false)
     private int getPixelColor(boolean needBiome, boolean needHeightAndID, boolean needTint, boolean needLight, boolean nether, boolean caves, World world, int multi, int startX, int startZ, int imageX, int imageY)
     {
-        if (VMFixes.configBlocked(blockPos)) return 0;
-
         int surfaceHeight;
         int seafloorHeight = -1;
         int underwaterTransparentHeight = -1;
