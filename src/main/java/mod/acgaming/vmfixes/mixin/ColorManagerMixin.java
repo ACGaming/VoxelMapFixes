@@ -2,6 +2,7 @@ package mod.acgaming.vmfixes.mixin;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -9,6 +10,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -17,9 +19,13 @@ import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.chunk.Chunk;
 
 import com.mamiyaotaru.voxelmap.ColorManager;
+import com.mamiyaotaru.voxelmap.forgemod.Share;
 import com.mamiyaotaru.voxelmap.interfaces.AbstractMapData;
+import com.mamiyaotaru.voxelmap.util.BlockRepository;
 import com.mamiyaotaru.voxelmap.util.GLUtils;
 import com.mamiyaotaru.voxelmap.util.ImageUtils;
 import com.mamiyaotaru.voxelmap.util.MutableBlockPos;
@@ -39,6 +45,8 @@ public abstract class ColorManagerMixin
     private HashSet<Integer> biomeTintsAvailable;
     @Shadow
     private HashMap<Integer, int[][]> blockTintTables;
+    @Shadow
+    private int sizeOfBiomeArray;
 
     /**
      * @author ACGaming
@@ -47,9 +55,10 @@ public abstract class ColorManagerMixin
     @Overwrite(remap = false)
     public int getBiomeTint(AbstractMapData mapData, World world, IBlockState blockState, int blockStateID, MutableBlockPos blockPos, MutableBlockPos loopBlockPos, int startX, int startZ)
     {
-        boolean live = false;
+        Chunk chunk = world.getChunk(blockPos);
+        boolean live = chunk.isLoaded();
         int tint = -2;
-        if (this.optifineInstalled || (!live && this.biomeTintsAvailable.contains(blockStateID))) try
+        if (this.optifineInstalled || (this.biomeTintsAvailable.contains(blockStateID))) try
         {
             int[][] tints = this.blockTintTables.get(blockStateID);
             if (tints != null)
@@ -121,6 +130,58 @@ public abstract class ColorManagerMixin
 
     @Shadow
     protected abstract int getBuiltInBiomeTint(AbstractMapData mapData, World world, IBlockState blockState, int blockStateID, MutableBlockPos blockPos, MutableBlockPos loopBlockPos, int startX, int startZ, boolean live);
+
+    /**
+     * @author ACGaming
+     * @reason VMFixes
+     */
+    @Overwrite(remap = false)
+    private void createTintTable(IBlockState blockState, MutableBlockPos loopBlockPos)
+    {
+        WorldClient worldClient = this.game.world;
+        if (worldClient == null) return;
+        Share.updateCloudsLock.lock();
+        try
+        {
+            int[][] tints = new int[this.sizeOfBiomeArray][32];
+            for (int[] row : tints)
+                Arrays.fill(row, -1);
+            int fakeX = (int) this.game.player.posX - 32;
+            int fakeZ = (int) this.game.player.posZ - 32;
+            Chunk chunk = worldClient.getChunk(loopBlockPos.withXYZ(fakeX, 0, fakeZ));
+            byte[] originalBiomes = new byte[256];
+            System.arraycopy(chunk.getBiomeArray(), 0, originalBiomes, 0, 256);
+            byte[] fakeBiome = new byte[256];
+            for (int biomeID = 0; biomeID < this.sizeOfBiomeArray; biomeID++)
+            {
+                if (Biome.getBiome(biomeID) != null)
+                {
+                    int[] row = new int[32];
+                    Arrays.fill(fakeBiome, (byte) biomeID);
+                    chunk.setBiomeArray(fakeBiome);
+                    Arrays.fill(row, this.game.getBlockColors().colorMultiplier(blockState, worldClient, loopBlockPos, 1) | 0xFF000000);
+                    tints[biomeID] = row;
+                }
+            }
+            int blockStateID = BlockRepository.getStateId(blockState);
+            this.blockTintTables.put(blockStateID, tints);
+        }
+        catch (Exception ignored) {}
+        finally
+        {
+            Share.updateCloudsLock.unlock();
+        }
+    }
+
+    /**
+     * @author ACGaming
+     * @reason VMFixes
+     */
+    @Overwrite(remap = false)
+    private int tintFromFakePlacedBlock(IBlockState blockState, MutableBlockPos loopBlockPos, byte biomeID)
+    {
+        return -1;
+    }
 
     /**
      * @author ACGaming
