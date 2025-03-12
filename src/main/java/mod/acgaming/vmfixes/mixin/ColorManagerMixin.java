@@ -1,10 +1,5 @@
 package mod.acgaming.vmfixes.mixin;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.util.HashMap;
-import java.util.HashSet;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.state.IBlockState;
@@ -20,74 +15,49 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
 import com.mamiyaotaru.voxelmap.ColorManager;
-import com.mamiyaotaru.voxelmap.interfaces.AbstractMapData;
 import com.mamiyaotaru.voxelmap.util.GLUtils;
 import com.mamiyaotaru.voxelmap.util.ImageUtils;
 import com.mamiyaotaru.voxelmap.util.MutableBlockPos;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import mod.acgaming.vmfixes.VMFixes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ColorManager.class)
 public abstract class ColorManagerMixin
 {
-    @Shadow
+    @Shadow(remap = false)
     Minecraft game;
-    @Shadow
-    private boolean optifineInstalled;
-    @Shadow
-    private HashSet<Integer> biomeTintsAvailable;
-    @Shadow
-    private HashMap<Integer, int[][]> blockTintTables;
-    @Shadow
-    private int sizeOfBiomeArray;
 
-    /**
-     * @author ACGaming
-     * @reason VMFixes
-     */
-    @Overwrite(remap = false)
-    public int getBiomeTint(AbstractMapData mapData, World world, IBlockState blockState, int blockStateID, MutableBlockPos blockPos, MutableBlockPos loopBlockPos, int startX, int startZ)
+    @Redirect(method = "getBiomeTint", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;isLoaded()Z"))
+    public boolean vmfGetBiomeTint(Chunk instance)
     {
-        Chunk chunk = world.getChunk(blockPos);
-        boolean live = chunk.isLoaded();
-        int tint = -2;
-        if (this.optifineInstalled || (this.biomeTintsAvailable.contains(blockStateID))) try
-        {
-            int[][] tints = this.blockTintTables.get(blockStateID);
-            if (tints != null)
-            {
-                int r = 0;
-                int g = 0;
-                int b = 0;
-                int t;
-                for (t = blockPos.getX() - 1; t <= blockPos.getX() + 1; t++)
-                {
-                    int s;
-                    for (s = blockPos.getZ() - 1; s <= blockPos.getZ() + 1; s++)
-                    {
-                        int biomeID;
-                        int dataX = t - startX;
-                        int dataZ = s - startZ;
-                        dataX = Math.max(dataX, 0);
-                        dataX = Math.min(dataX, mapData.getWidth() - 1);
-                        dataZ = Math.max(dataZ, 0);
-                        dataZ = Math.min(dataZ, mapData.getHeight() - 1);
-                        biomeID = mapData.getBiomeID(dataX, dataZ);
-                        if (biomeID == -1) biomeID = 1;
-                        int biomeTint = tints[biomeID][loopBlockPos.getY() / 8];
-                        r += (biomeTint & 0xFF0000) >> 16;
-                        g += (biomeTint & 0xFF00) >> 8;
-                        b += biomeTint & 0xFF;
-                    }
-                }
-                tint = 0xFF000000 | (r / 9 & 0xFF) << 16 | (g / 9 & 0xFF) << 8 | b / 9 & 0xFF;
-            }
-        }
-        catch (Exception ignored) {}
-        if (tint == -2) tint = getBuiltInBiomeTint(mapData, world, blockState, blockStateID, blockPos, loopBlockPos, startX, startZ, live);
-        return tint;
+        return false;
+    }
+
+    @Inject(method = "createTintTable", at = @At(value = "HEAD"), cancellable = true, remap = false)
+    public void vmfCreateTintTable(IBlockState blockState, MutableBlockPos loopBlockPos, CallbackInfo ci)
+    {
+        ci.cancel();
+    }
+
+    @Inject(method = "tintFromFakePlacedBlock", at = @At(value = "HEAD"), cancellable = true, remap = false)
+    public void vmfTintFromFakePlacedBlock(IBlockState blockState, MutableBlockPos loopBlockPos, byte biomeID, CallbackInfoReturnable<Integer> cir)
+    {
+        cir.setReturnValue(-1);
+    }
+
+    @Inject(method = "loadTexturePackTerrainImage", at = @At(value = "HEAD"), cancellable = true, remap = false)
+    public void vmfLoadTexturePackTerrainImage(CallbackInfo ci)
+    {
+        ci.cancel();
     }
 
     /**
@@ -111,37 +81,16 @@ public abstract class ColorManagerMixin
         }
         catch (Exception e)
         {
-            VMFixes.LOGGER.warn("Error getting block armor image for " + Block.getIdFromBlock(blockState.getBlock()) + "," + blockState.getBlock().getMetaFromState(blockState) + ": " + e.getLocalizedMessage());
-            e.printStackTrace();
+            VMFixes.LOGGER.warn("Error getting block armor image for {},{}: {}", Block.getIdFromBlock(blockState.getBlock()), blockState.getBlock().getMetaFromState(blockState), e.getLocalizedMessage());
             return null;
         }
     }
 
-    @Shadow
-    protected abstract void drawModel(float scale, int captureDepth, EnumFacing facing, IBlockState blockState, IBakedModel model, ItemStack stack);
-
-    @Shadow
+    @Shadow(remap = false)
     protected abstract int getColorForTerrainSprite(IBlockState blockState, BlockRendererDispatcher blockRendererDispatcher);
 
-    @Shadow
-    protected abstract int getBuiltInBiomeTint(AbstractMapData mapData, World world, IBlockState blockState, int blockStateID, MutableBlockPos blockPos, MutableBlockPos loopBlockPos, int startX, int startZ, boolean live);
-
-    /**
-     * @author ACGaming
-     * @reason VMFixes
-     */
-    @Overwrite(remap = false)
-    private void createTintTable(IBlockState blockState, MutableBlockPos loopBlockPos) {}
-
-    /**
-     * @author ACGaming
-     * @reason VMFixes
-     */
-    @Overwrite(remap = false)
-    private int tintFromFakePlacedBlock(IBlockState blockState, MutableBlockPos loopBlockPos, byte biomeID)
-    {
-        return -1;
-    }
+    @Shadow(remap = false)
+    protected abstract void drawModel(float scale, int captureDepth, EnumFacing facing, IBlockState blockState, IBakedModel model, ItemStack stack);
 
     /**
      * @author ACGaming
@@ -196,15 +145,8 @@ public abstract class ColorManagerMixin
         }
         catch (Exception e)
         {
-            VMFixes.LOGGER.warn("Error getting color from TextureAtlasSprite " + icon);
+            VMFixes.LOGGER.warn("Error getting color from TextureAtlasSprite {}", icon);
         }
         return color;
     }
-
-    /**
-     * @author ACGaming
-     * @reason VMFixes
-     */
-    @Overwrite(remap = false)
-    private void loadTexturePackTerrainImage() {}
 }

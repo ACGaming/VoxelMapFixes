@@ -1,19 +1,16 @@
 package mod.acgaming.vmfixes;
 
-import java.awt.image.BufferedImage;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 
-@Mod(modid = VMFixes.MODID, name = VMFixes.NAME, version = VMFixes.VERSION, acceptedMinecraftVersions = "[1.12.2]", dependencies = "required-after:mixinbooter;required-after:voxelmap", clientSideOnly = true)
+import java.awt.image.BufferedImage;
+
+@Mod(modid = Tags.MOD_ID, name = Tags.MOD_NAME, version = Tags.VERSION, dependencies = "required-after:mixinbooter;required-after:voxelmap", clientSideOnly = true)
 public class VMFixes
 {
-    public static final String MODID = "vmfixes";
-    public static final String NAME = "VoxelMap Fixes";
-    public static final String VERSION = "1.12.2-1.0.7";
     public static final Logger LOGGER = LogManager.getLogger();
 
     // Courtesy of mezz
