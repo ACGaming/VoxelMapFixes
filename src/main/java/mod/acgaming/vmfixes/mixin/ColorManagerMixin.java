@@ -12,7 +12,6 @@ import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
 
 import com.mamiyaotaru.voxelmap.ColorManager;
 import com.mamiyaotaru.voxelmap.util.GLUtils;
@@ -26,7 +25,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -35,12 +33,6 @@ public abstract class ColorManagerMixin
 {
     @Shadow(remap = false)
     Minecraft game;
-
-    @Redirect(method = "getBiomeTint", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;isLoaded()Z"))
-    public boolean vmfGetBiomeTint(Chunk instance)
-    {
-        return false;
-    }
 
     @Inject(method = "createTintTable", at = @At(value = "HEAD"), cancellable = true, remap = false)
     public void vmfCreateTintTable(IBlockState blockState, MutableBlockPos loopBlockPos, CallbackInfo ci)
