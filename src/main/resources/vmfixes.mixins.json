@@ -1,7 +1,0 @@
-{
-  "package": "mod.acgaming.vmfixes.mixin",
-  "refmap": "vmfixes.refmap.json",
-  "minVersion": "0.8",
-  "compatibilityLevel": "JAVA_8",
-  "mixins": ["ColorManagerMixin", "MapMixin", "PersistentMapMixin"]
-}
