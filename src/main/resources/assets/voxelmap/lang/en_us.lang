@@ -1,0 +1,6 @@
+key.minimap.toggleingamewaypoints=Toggle In-game Waypoints
+options.minimap.radar.radarmode=Radar Mode
+options.minimap.radar.radarmode.full=Full
+options.minimap.radar.radarmode.simple=Simple
+options.minimap.radar.showfacing=Show Facing
+options.minimap.rotation=Rotation
