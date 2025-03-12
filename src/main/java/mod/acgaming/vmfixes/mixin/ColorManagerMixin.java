@@ -110,7 +110,7 @@ public abstract class ColorManagerMixin
             }
             else
             {
-                blockState = blockState.getBlock().hasTileEntity(blockState) ? blockState.getBlock().getDefaultState() : blockState.getActualState(this.game.world, blockPos);
+                blockState = blockState.getBlock().hasTileEntity(blockState) ? blockState : blockState.getActualState(this.game.world, blockPos);
             }
             TextureAtlasSprite icon = blockRendererDispatcher.getModelForState(blockState).getQuads(blockState, facing, 0).get(0).getSprite();
             return getColorForIcon(icon);
