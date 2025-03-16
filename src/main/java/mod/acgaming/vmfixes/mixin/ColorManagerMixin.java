@@ -1,10 +1,10 @@
 package mod.acgaming.vmfixes.mixin;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.ItemStack;
@@ -19,6 +19,7 @@ import com.mamiyaotaru.voxelmap.util.ImageUtils;
 import com.mamiyaotaru.voxelmap.util.MutableBlockPos;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import mod.acgaming.vmfixes.VMFixes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -59,9 +60,9 @@ public abstract class ColorManagerMixin
     @Overwrite(remap = false)
     public final BufferedImage getBlockImage(IBlockState blockState, ItemStack stack, World world)
     {
+        BufferedImage blockImage = null;
         try
         {
-            BufferedImage blockImage = null;
             if (GLUtils.fboEnabled)
             {
                 IBakedModel model = this.game.getRenderItem().getItemModelWithOverrides(stack, world, null);
@@ -69,13 +70,9 @@ public abstract class ColorManagerMixin
                 blockImage = ImageUtils.createBufferedImageFromGLID(GLUtils.fboTextureID);
                 blockImage = ImageUtils.trimCentered(blockImage);
             }
-            return blockImage;
         }
-        catch (Exception e)
-        {
-            VMFixes.LOGGER.warn("Error getting block armor image for {},{}: {}", Block.getIdFromBlock(blockState.getBlock()), blockState.getBlock().getMetaFromState(blockState), e.getLocalizedMessage());
-            return null;
-        }
+        catch (Exception ignored) {}
+        return blockImage;
     }
 
     @Shadow(remap = false)
@@ -91,7 +88,7 @@ public abstract class ColorManagerMixin
     @Overwrite(remap = false)
     private int getColorForBlockPosBlockStateAndFacing(BlockPos blockPos, IBlockState blockState, EnumFacing facing)
     {
-        int color;
+        TextureAtlasSprite icon = null;
         try
         {
             EnumBlockRenderType blockRenderType = blockState.getRenderType();
@@ -100,20 +97,25 @@ public abstract class ColorManagerMixin
             {
                 return getColorForTerrainSprite(blockState, blockRendererDispatcher);
             }
-            else
+            if (!blockState.getBlock().hasTileEntity(blockState))
             {
-                blockState = blockState.getBlock().hasTileEntity(blockState) ? blockState : blockState.getActualState(this.game.world, blockPos);
+                blockState = blockState.getActualState(this.game.world, blockPos);
+                List<BakedQuad> quads = blockRendererDispatcher.getModelForState(blockState).getQuads(blockState, facing, 0);
+                if (!quads.isEmpty())
+                {
+                    return getColorForIcon(quads.get(0).getSprite());
+                }
             }
-            TextureAtlasSprite icon = blockRendererDispatcher.getModelForState(blockState).getQuads(blockState, facing, 0).get(0).getSprite();
-            return getColorForIcon(icon);
+            icon = blockRendererDispatcher.getBlockModelShapes().getTexture(blockState);
         }
-        catch (Exception e)
+        catch (Exception ignored) {}
+        if (icon == null)
         {
             MapColor mapColor = blockState.getMaterial().getMaterialMapColor();
             int index = mapColor.colorIndex;
-            color = mapColor.getMapColor(index);
+            return mapColor.getMapColor(index);
         }
-        return color;
+        return getColorForIcon(icon);
     }
 
     /**
@@ -135,10 +137,7 @@ public abstract class ColorManagerMixin
             gfx.dispose();
             color = singlePixelBuff.getRGB(0, 0);
         }
-        catch (Exception e)
-        {
-            VMFixes.LOGGER.warn("Error getting color from TextureAtlasSprite {}", icon);
-        }
+        catch (Exception ignored) {}
         return color;
     }
 }
