@@ -35,4 +35,5 @@ dependencies {
     runtimeOnly 'com.cleanroommc:osxnarratorblocker:1.0'
 
     implementation rfg.deobf('curse.maven:voxelmap-225179:3029445')
+    implementation rfg.deobf('curse.maven:tombmanygraves-262823:2619249')
 }

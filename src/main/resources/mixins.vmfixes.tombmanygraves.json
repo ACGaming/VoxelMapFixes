@@ -1,0 +1,9 @@
+{
+  "package": "mod.acgaming.vmfixes.compat.tombmanygraves.mixin",
+  "required": true,
+  "refmap": "mixins.vmfixes.refmap.json",
+  "target": "@env(DEFAULT)",
+  "minVersion": "0.8.5",
+  "compatibilityLevel": "JAVA_8",
+  "client": ["TileGraveMixin"]
+}
