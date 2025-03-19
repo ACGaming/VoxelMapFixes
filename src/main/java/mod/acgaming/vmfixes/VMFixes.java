@@ -2,40 +2,30 @@ package mod.acgaming.vmfixes;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 
-import java.awt.image.BufferedImage;
-
-@Mod(modid = Tags.MOD_ID, name = Tags.MOD_NAME, version = Tags.VERSION, dependencies = "required-after:mixinbooter;required-after:voxelmap", clientSideOnly = true)
+@Mod(modid = Tags.MOD_ID, name = Tags.MOD_NAME, version = Tags.VERSION, dependencies = "required-after:mixinbooter;after:voxelmap;after:tombmanygraves")
 public class VMFixes
 {
-    public static final Logger LOGGER = LogManager.getLogger();
-
-    // Courtesy of mezz
-    public static BufferedImage getBufferedImage(TextureAtlasSprite textureAtlasSprite)
-    {
-        final int iconWidth = textureAtlasSprite.getIconWidth();
-        final int iconHeight = textureAtlasSprite.getIconHeight();
-        final int frameCount = textureAtlasSprite.getFrameCount();
-        if (iconWidth <= 0 || iconHeight <= 0 || frameCount <= 0)
-        {
-            return null;
-        }
-        BufferedImage bufferedImage = new BufferedImage(iconWidth, iconHeight * frameCount, BufferedImage.TYPE_4BYTE_ABGR);
-        for (int i = 0; i < frameCount; i++)
-        {
-            int[][] frameTextureData = textureAtlasSprite.getFrameTextureData(i);
-            int[] largestMipMapTextureData = frameTextureData[0];
-            bufferedImage.setRGB(0, i * iconHeight, iconWidth, iconHeight, largestMipMapTextureData, 0, iconWidth);
-        }
-        return bufferedImage;
-    }
+    public static final Logger LOGGER = LogManager.getLogger(Tags.MOD_NAME);
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event)
     {
-        LOGGER.info("VoxelMap Fixes initialized");
+        if (FMLLaunchHandler.side().isClient() && !Loader.isModLoaded("voxelmap"))
+        {
+            LOGGER.fatal("Hey, where's my VoxelMap?!");
+        }
+        else
+        {
+            LOGGER.info("{} initialized", Tags.MOD_NAME);
+            if (Loader.isModLoaded("tombmanygraves"))
+            {
+                LOGGER.info("Mod support for {} enabled", Loader.instance().getIndexedModList().get("tombmanygraves").getName());
+            }
+        }
     }
 }

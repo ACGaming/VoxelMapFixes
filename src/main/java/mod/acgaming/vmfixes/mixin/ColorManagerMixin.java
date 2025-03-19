@@ -20,10 +20,10 @@ import com.mamiyaotaru.voxelmap.util.MutableBlockPos;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
-import mod.acgaming.vmfixes.VMFixes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -128,7 +128,7 @@ public abstract class ColorManagerMixin
         int color = 0;
         try
         {
-            BufferedImage iconBuff = VMFixes.getBufferedImage(icon);
+            BufferedImage iconBuff = vmfixes$getBufferedImage(icon);
             if (iconBuff == null) return color;
             Image singlePixel = iconBuff.getScaledInstance(1, 1, 4);
             BufferedImage singlePixelBuff = new BufferedImage(1, 1, iconBuff.getType());
@@ -139,5 +139,26 @@ public abstract class ColorManagerMixin
         }
         catch (Exception ignored) {}
         return color;
+    }
+
+    // Courtesy of mezz
+    @Unique
+    private BufferedImage vmfixes$getBufferedImage(TextureAtlasSprite textureAtlasSprite)
+    {
+        final int iconWidth = textureAtlasSprite.getIconWidth();
+        final int iconHeight = textureAtlasSprite.getIconHeight();
+        final int frameCount = textureAtlasSprite.getFrameCount();
+        if (iconWidth <= 0 || iconHeight <= 0 || frameCount <= 0)
+        {
+            return null;
+        }
+        BufferedImage bufferedImage = new BufferedImage(iconWidth, iconHeight * frameCount, BufferedImage.TYPE_4BYTE_ABGR);
+        for (int i = 0; i < frameCount; i++)
+        {
+            int[][] frameTextureData = textureAtlasSprite.getFrameTextureData(i);
+            int[] largestMipMapTextureData = frameTextureData[0];
+            bufferedImage.setRGB(0, i * iconHeight, iconWidth, iconHeight, largestMipMapTextureData, 0, iconWidth);
+        }
+        return bufferedImage;
     }
 }
