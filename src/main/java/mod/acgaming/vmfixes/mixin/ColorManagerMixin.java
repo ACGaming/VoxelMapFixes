@@ -109,7 +109,7 @@ public abstract class ColorManagerMixin
             icon = blockRendererDispatcher.getBlockModelShapes().getTexture(blockState);
         }
         catch (Exception ignored) {}
-        if (icon == null)
+        if (icon == null || icon.getIconName().equals("missingno"))
         {
             MapColor mapColor = blockState.getMaterial().getMaterialMapColor();
             int index = mapColor.colorIndex;
@@ -138,6 +138,10 @@ public abstract class ColorManagerMixin
             color = singlePixelBuff.getRGB(0, 0);
         }
         catch (Exception ignored) {}
+        if (color == 452984832)
+        {
+            color = 0;
+        }
         return color;
     }
 
