@@ -36,4 +36,7 @@ dependencies {
 
     implementation rfg.deobf('curse.maven:voxelmap-225179:3029445')
     implementation rfg.deobf('curse.maven:tombmanygraves-262823:2619249')
+
+    implementation rfg.deobf("curse.maven:ingame-info-xml-225604:2489566")
+    runtimeOnly rfg.deobf("curse.maven:lunatriuscore-225605:2489549")
 }
