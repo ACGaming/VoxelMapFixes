@@ -12,7 +12,11 @@ public class VMFixesMixinLoader implements ILateMixinLoader
     @Override
     public List<String> getMixinConfigs()
     {
-        return Lists.newArrayList("mixins.vmfixes.json", "mixins.vmfixes.tombmanygraves.json");
+        return Lists.newArrayList(
+                "mixins.vmfixes.json",
+                "mixins.vmfixes.tombmanygraves.json",
+                "mixins.vmfixes.ingameinfoxml.json"
+        );
     }
 
     @Override
@@ -25,6 +29,10 @@ public class VMFixesMixinLoader implements ILateMixinLoader
         if (mixinConfig.equals("mixins.vmfixes.tombmanygraves.json"))
         {
             return Loader.isModLoaded("tombmanygraves");
+        }
+        if (mixinConfig.equals("mixins.vmfixes.ingameinfoxml.json"))
+        {
+            return Loader.isModLoaded("ingameinfoxml");
         }
         return true;
     }
