@@ -26,11 +26,13 @@ public class RemoveDeathpointPacket extends BaseThreadsafePacket
     @Override
     public void handleClientSafe(NetHandlerPlayClient netHandler)
     {
+        if (this.pos == null || VoxelMap.getInstance() == null) return;
         IWaypointManager waypointManager = VoxelMap.getInstance().getWaypointManager();
+        if (waypointManager == null || waypointManager.getWaypoints() == null) return;
         Waypoint toDel = null;
         for (Waypoint pt : waypointManager.getWaypoints())
         {
-            if ((pt.name.equals("Latest Death") || pt.name.contains("Previous Death")) && pt.getX() == this.pos.getX() && pt.getZ() == this.pos.getZ())
+            if (pt != null && pt.name != null && (pt.name.equals("Latest Death") || pt.name.contains("Previous Death")) && pt.getX() == this.pos.getX() && pt.getZ() == this.pos.getZ())
             {
                 toDel = pt;
                 break;
